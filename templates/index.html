@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Revenue Prediction</title>
+        <style>
+            /* Global Styles */
+            body {
+                font-family: 'Arial', sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f9;
+                color: #333;
+            }
+            h1, h2 {
+                text-align: center;
+            }
+    
+            /* Main Container */
+            .main-container {
+                max-width: 1200px;
+                margin: 10px auto;
+                padding: 5px;
+                background-color: white;
+                border-radius: 10px;
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            }
+    
+            /* Form Container */
+            .form-container {
+                padding: 15px;
+            }
+    
+            /* Grid Layout */
+            .form-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+            }
+    
+            .form-group {
+                display: flex;
+                flex-direction: column;
+            }
+    
+            .form-group label {
+                font-weight: bold;
+                margin-bottom: 5px;
+                color: #555;
+            }
+    
+            .form-group input {
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+    
+            .form-group .sample-value {
+                font-size: 14px;
+                color: #888;
+                margin-top: 5px;
+            }
+    
+            .btn {
+                width: 100%;
+                padding: 12px;
+                font-size: 16px;
+                font-weight: bold;
+                background-color: #007BFF;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+    
+            .btn:hover {
+                background-color: #0056b3;
+            }
+    
+            .result {
+                margin-top: 30px;
+                padding: 20px;
+                background-color: #f9f9f9;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                text-align: center;
+            }
+            .result h3 {
+                font-size: 24px;
+                color: #333;
+                margin-bottom: 10px;
+            }
+            .result .predicted-revenue {
+                font-size: 28px;
+                font-weight: bold;
+                color: #007BFF;
+                margin: 0;
+            }
+    
+            /* Loading Spinner */
+            .spinner {
+                display: none;
+                margin: 20px auto;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #3498db;
+                border-radius: 50%;
+                width: 50px;
+                height: 50px;
+                animation: spin 1s linear infinite;
+            }
+    
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+    
+            /* Responsive Typography */
+            h1 {
+                font-size: 32px;
+                margin-bottom: 5px;
+            }
+    
+            h2 {
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+            
+            .form-group:last-child {
+                margin-bottom: 30px; /* Space before button */
+            }
+        </style>
+    </head>
+    <body>
+    
+        <div class="main-container">
+            <h1>Pharmacy Revenue Forecasting for Dynamic Pricing</h1>
+    
+            <!-- Form Container -->
+            <div class="form-container">
+                <form id="predictionForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="pid">PID:</label>
+                            <input type="text" id="pid" name="pid" required>
+                            <span class="sample-value">{e.g., '6750', '2655', '2491', '7403'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="adFlag">Ad Flag:</label>
+                            <input type="number" id="adFlag" name="adFlag" required>
+                            <span class="sample-value">{0 or 1}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="availability">Availability:</label>
+                            <input type="number" id="availability" name="availability" required>
+                            <span class="sample-value">{e.g., '2', '50', '100', '2000'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="competitorPrice">Competitor Price:</label>
+                            <input type="number" id="competitorPrice" name="competitorPrice" required>
+                            <span class="sample-value">{e.g., '14.6', '25.99', '7.6', '50.2'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="price">Price:</label>
+                            <input type="number" id="price" name="price" required>
+                            <span class="sample-value">{e.g., '16.89', '29.99', '6.55', '15.35'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="content">Content:</label>
+                            <input type="number" id="content" name="content" required>
+                            <span class="sample-value">{e.g., '10', '20', '50', '100'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="rrp">RRP (Recommended Retail Price):</label>
+                            <input type="number" id="rrp" name="rrp" required>
+                            <span class="sample-value">{e.g., '9.85', '10.89', '14.25', '21.9'}</span>           
+                        </div>
+                        <div class="form-group">
+                            <label for="manufacturer">Manufacturer:</label>
+                            <input type="text" id="manufacturer" name="manufacturer" required>
+                            <span class="sample-value">{e.g., '255', '84', '18', '52'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="group">Group:</label>
+                            <input type="text" id="group" name="group" required>
+                            <span class="sample-value">{e.g., '2FOI', '22OI3', '21OKG', '18OZ0'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="unit">Unit:</label>
+                            <input type="text" id="unit" name="unit" required>
+                            <span class="sample-value">{e.g., 'ML', 'KG', 'ST', 'G'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="pharmForm">Pharmaceutical Form:</label>
+                            <input type="text" id="pharmForm" name="pharmForm" required>
+                            <span class="sample-value">{e.g., 'TAB', 'CRE', 'TRO', 'GEL'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="genericProduct">Generic Product (0 or 1):</label>
+                            <input type="number" id="genericProduct" name="genericProduct" required>
+                            <span class="sample-value">{0 or 1}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="salesIndex">Sales Index:</label>
+                            <input type="number" id="salesIndex" name="salesIndex" required>
+                            <span class="sample-value">{e.g., '40' '53', '54', '44'}</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category:</label>
+                            <input type="text" id="category" name="category" required>
+                            <span class="sample-value">{e.g., '193.0', '50.0', '90.0', 116.0}</span>
+                        </div>
+                    </div>
+    
+                    <button type="button" class="btn" onclick="submitForm()">Get Predicted Revenue</button>
+                </form>
+            </div>
+    
+            <!-- Loading Spinner -->
+            <div id="loading" class="spinner"></div>
+    
+            <!-- Result Section -->
+            <div class="result" id="result" style="display: none;">
+                <h3 style="display: inline; font-size: 24px;">Predicted Revenue Per User Action:</h3>
+                <span id="predictedRevenue" style="font-size: 24px; font-weight: bold; color: #007BFF; margin-left: 10px;">$0.00</span>
+            </div>
+            
+    
+    </body>
+    
+    
+
+    <script>
+        function submitForm() {
+            const formData = new FormData(document.getElementById('predictionForm'));
+            const userInput = {};
+
+            // Convert FormData to JSON object
+            formData.forEach((value, key) => {
+                userInput[key] = value;
+            });
+
+            // Show loading spinner
+            const loadingSpinner = document.getElementById('loading');
+            loadingSpinner.style.display = 'block';
+
+            // Clear previous result
+            document.getElementById('result').style.display = 'none';
+
+            // Simulate Backend Request
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(userInput),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+                // Hide spinner
+                loadingSpinner.style.display = 'none';
+
+                // Display result
+                const resultContainer = document.getElementById('result');
+                resultContainer.style.display = 'block';
+
+                document.getElementById('predictedRevenue').innerText = `$ ${data.predicted_revenue}`;
+            })
+            .catch((error) => {
+                console.error(error);
+                document.getElementById('predictedRevenue').innerText = "Error calculating revenue!";
+            });
+        }
+    </script>
+ 
+</body>
+</html>

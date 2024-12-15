@@ -7,6 +7,7 @@ import pandas as pd
 from flask_cors import CORS
 import requests
 import time
+import os
 
 
 # Initialize the H2O cluster
@@ -129,14 +130,16 @@ def predict():
         # Convert features to H2OFrame
         # h2o_features = H2OFrame(features)
 
-        url = 'http://java-backend:8080/predict'
+        backend_url = os.getenv('JAVA_BACKEND_URL', 'http://localhost:8080')
+
+        #url = 'http://java-backend:8080/predict'
         # Convert the DataFrame to a dictionary without index
         ordered_output_dict = features.iloc[0].to_dict()
 
         # Now create the CSV-like string format
         input_data = ','.join([f"{key}:{value}" for key, value in ordered_output_dict.items()])
 
-        response = requests.post(url, data=input_data)
+        response = requests.post(backend_url, data=input_data)
         prediction = response.json()
 
         print("Calculating prediction...")  # Log that prediction is being calculated

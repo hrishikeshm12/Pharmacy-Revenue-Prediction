@@ -4,12 +4,14 @@ services:
   flask-app:
     build:
       context: .
+    image: hrish06062001/flask-app:latest  # Add image for pushing to Docker Hub
     ports:
       - "5000:5000"
 
   java-backend:
     build:
       context: ./mojo-api
+    image: hrish06062001/java-backend:latest  # Add image for pushing to Docker Hub
     ports:
       - "8080:8080"
     depends_on:
